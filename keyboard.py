@@ -3,8 +3,12 @@ from db import get_game_room, update_game_room
 import json
 from utils.utils_checkers import *
 
+def start_game(type_button):
+	markup = types.InlineKeyboardMarkup()
+	markup.add(types.InlineKeyboardButton('Играть',callback_data=type_button))
+	return markup
 
-def start_markup():
+def zero_game_markup():
 	markup = types.InlineKeyboardMarkup()
 	# arr = []
 	# for x in range(3):
@@ -33,8 +37,8 @@ def update_inline_markup(inline_message_id, place):
 
 	game_room_going = get_game_room(inline_id=inline_message_id)[0]
 	if game_room_going[4] == "end":
-		markup.add(types.InlineKeyboardButton("Начать заново", callback_data='restart_checkers'))
-		markup.add(types.InlineKeyboardButton("Выйти", callback_data='delete_checkers'))
+		markup.add(types.InlineKeyboardButton("Начать заново", callback_data='restart_zero_game'))
+		markup.add(types.InlineKeyboardButton("Выйти", callback_data='delete_zero_game'))
 	return markup
 
 

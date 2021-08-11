@@ -60,8 +60,8 @@ def get_arr(array, markup, type_ = 0):
 				arr_.append(types.InlineKeyboardButton(dict_[index_dict], callback_data=index_dict))
 		markup.row(*arr_)
 	if type_ == 1: 
-		markup.add(types.InlineKeyboardButton("Начать заново", callback_data='restart_zero_game'))
-		markup.add(types.InlineKeyboardButton("Выйти", callback_data='delete_zero_game'))
+		markup.add(types.InlineKeyboardButton("Начать заново", callback_data='restart_checkers'))
+		markup.add(types.InlineKeyboardButton("Выйти", callback_data='delete_checkers'))
 
 async def update_arr(array, index, value):
 	for row_ in array:

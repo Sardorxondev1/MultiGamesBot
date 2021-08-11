@@ -47,15 +47,26 @@ def get_all_users(conn):
 	return c.fetchall()
 
 # База игр
+
 @ensure_connection
-def new_game_room(conn, owner: int, inline_id: str, type_game: str = "zero-game", place: str = None):
+def new_game_room(conn, owner: int, inline_id: str):
 	c = conn.cursor()
-	if type_game == "checkers":
-		place = json.dumps(place)
-	else:
-		place = json.dumps(["🔥" for _ in range(9)])
-	c.execute('INSERT INTO game_room (owner, place, inline_id, type_game) VALUES (?,?,?,?)', (owner, place, inline_id, type_game))
+	# if type_game == "checkers":
+	# 	place = json.dumps(place)
+	# else:
+	# 	place = json.dumps(["🔥" for _ in range(9)])
+	c.execute('INSERT INTO game_room (owner, inline_id) VALUES (?,?)', (owner, inline_id))
 	conn.commit()
+
+# @ensure_connection
+# def new_game_room(conn, owner: int, inline_id: str, type_game: str = "zero-game", place: str = None):
+# 	c = conn.cursor()
+# 	if type_game == "checkers":
+# 		place = json.dumps(place)
+# 	else:
+# 		place = json.dumps(["🔥" for _ in range(9)])
+# 	c.execute('INSERT INTO game_room (owner, place, inline_id, type_game) VALUES (?,?,?,?)', (owner, place, inline_id, type_game))
+# 	conn.commit()
 
 @ensure_connection
 def get_game_room(conn, inline_id: str):

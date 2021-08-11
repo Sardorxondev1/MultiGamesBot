@@ -4,14 +4,14 @@ import asyncio, os, json
 from keyboard import *
 from db import *
 from utils.utils_checkers import *
+from cfg import bot
 
 
 
-# @dp.callback_query_handler()
 async def checkers_callback_handler(call: types.CallbackQuery):
 	inline_id = call.inline_message_id
+	room = get_game_room(inline_id=inline_id)[0]
 	if "place_" in call.data:
-		room = get_game_room(inline_id=inline_id)[0]
 
 		if (room[2] is None) and (call["from"].id != room[0]):
 			update_game_room(inline_id=inline_id, index="player_2", value=call["from"].id)
@@ -60,23 +60,31 @@ async def checkers_callback_handler(call: types.CallbackQuery):
 		array = await update_arr(array=array, index=going[1], value=" ")
 		update_game_room(inline_id=inline_id, index="place", value=json.dumps(array))
 		update_game_room(inline_id=inline_id, index="going", value=json.dumps([going[0], "end"]))
-
 		black, white = await count_checkers(array)
 		if (black == 0) or (white == 0):
 			update_game_room(inline_id=inline_id, index="going", value=json.dumps("end"))
 			return await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Шашки\n{'Победа чёрных ⚫️'if white == 0 else 'Победа белых ⚪️'}", reply_markup=checkers_markup(2, array))
-		await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Шашки\nЧёрных ⚫️ - {black} | Белых ⚪️ - {white}", reply_markup=checkers_markup(1, array))
+		await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"""Шашки\nЧёрных ⚫️ - {black} | Белых ⚪️ - {white}\nСейчас ходят: {"<a href='tg://user?id="+str(room[2])+"'>⚪️</a>!" if (going[0] == room[0]) and (going[1] != 'end') else "<a href='tg://user?id="+str(room[0])+"'>⚫️</a>!"}""", parse_mode="HTML", reply_markup=checkers_markup(1, array))
 	
 	if call.data == "restart_checkers":
 		room = get_game_room(inline_id=call.inline_message_id)[0]
 		update_game_room(inline_id=call.inline_message_id, index="going", value=room[2])
 		update_game_room(inline_id=call.inline_message_id, index="place", value=json.dumps(await create_place()))
-		return await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Шашки\nПервый ходит <a href='tg://user?id={room[2]}'>соперник</a>! (белыми)", parse_mode="HTML", reply_markup=checkers_markup(0))
+		return await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Шашки\nПервый ходит <a href='tg://user?id={get_game_room(inline_id=inline_id)[0][2]}'>соперник</a>! (белыми)", parse_mode="HTML", reply_markup=checkers_markup(0))
 	elif call.data == "delete_checkers":
 		room = get_game_room(inline_id=call.inline_message_id)[0]
 		await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Круто поиграли ☺️")
 		delete_game_room(inline_id=call.inline_message_id)
 		return await call.answer(text="Игра была удалена из чата")
+	elif call.data == "start_checkers":
+		print(call)
+		if room[0] == call["from"].id: return await call.answer("Нажать на кнопку должен ваш соперник")
+		place = await create_place()
+		update_game_room(inline_id=call.inline_message_id, index="place", value=json.dumps(place))
+		update_game_room(inline_id=call.inline_message_id, index="type_game", value="checkers")
+		update_game_room(inline_id=call.inline_message_id, index="player_2", value=call["from"].id)
+		await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Шашки\nРешите сами, кто ходит первый!", parse_mode="HTML", reply_markup=checkers_markup(0))
+
 
 	await call.answer()
 
