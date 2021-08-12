@@ -26,7 +26,6 @@ async def checked_place_game(inline_id, place):
 
 async def callback_handler_ticTacToe(call: types.CallbackQuery):
 	room = get_game_room(inline_id=call.inline_message_id)[0]
-	chat_id = str(call["from"].id)
 	if "plane_" in call.data:
 		room_place = json.loads(room[1])
 		# room_place[int(call.data.split("plane_")[1])] = "❎"
@@ -38,19 +37,19 @@ async def callback_handler_ticTacToe(call: types.CallbackQuery):
 			try: return await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Игра завершина", reply_markup=update_inline_markup(call.inline_message_id, room_place))
 			except Exception as e: print("Ошибка из TicTacToe:",e)
 
-		if room[2] is None and chat_id == room[0]:
+		if room[2] is None and call["from"].id == room[0]:
 			return await call.answer(text="Уступайте сопернику шаг, не нужно быть жадиной", show_alert=True)
 			# await bot.answer_callback_query(callback_query_id=call.id, text="Уступайте сопернику шаг, не нужно быть жадиной", show_alert=1)  
-		elif room[2] is None and chat_id != room[0]:
-			update_game_room(inline_id=call.inline_message_id, index="player_2", value=chat_id)
+		elif room[2] is None and call["from"].id != room[0]:
+			update_game_room(inline_id=call.inline_message_id, index="player_2", value=call["from"].id)
 			await bot.answer_callback_query(callback_query_id=call.id, text="Вы начали игру! Вы играете за ⭕️")
 			room_place[int(call.data.split("plane_")[1])] = "⭕️"
 			update_game_room(inline_id=call.inline_message_id, index="going", value=room[0])
 
-		if room[4] is not None and room[4] != chat_id:
+		if room[4] is not None and room[4] != str(call["from"].id):
 			return await bot.answer_callback_query(callback_query_id=call.id, text="Сейчас ходит соперник, йоу")
 		
-		if room[4] == chat_id and chat_id == room[0]:
+		if room[4] == str(call["from"].id) and call["from"].id == room[0]:
 			update_game_room(inline_id=call.inline_message_id, index="going", value=room[2])
 			room_place[int(call.data.split("plane_")[1])] = "❎"
 		else: 
@@ -71,10 +70,10 @@ async def callback_handler_ticTacToe(call: types.CallbackQuery):
 		return await call.answer(text="Игра была удалена из чата")
 	elif call.data == "start_zero_game":
 		print(call)
-		if room[0] == chat_id: return await call.answer("Нажать на кнопку должен ваш соперник")
+		if room[0] == call["from"].id: return await call.answer("Нажать на кнопку должен ваш соперник")
 		update_game_room(inline_id=call.inline_message_id, index="place", value=json.dumps(["🔥" for _ in range(9)]))
 		update_game_room(inline_id=call.inline_message_id, index="type_game", value="zero-game")
-		update_game_room(inline_id=call.inline_message_id, index="player_2", value=chat_id)
+		update_game_room(inline_id=call.inline_message_id, index="player_2", value=call["from"].id)
 		await bot.edit_message_text(inline_message_id=call.inline_message_id, text=f"Крестики нолики\nПервый ходит <a href='tg://user?id={get_game_room(inline_id=call.inline_message_id)[0][2]}'>соперник</a>", parse_mode="HTML", reply_markup=zero_game_markup())
 
 	await call.answer()
