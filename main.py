@@ -12,8 +12,6 @@ from utils.utils_checkers import *
 from handlers.ticTacToe import callback_handler_ticTacToe
 from handlers.checkers import checkers_callback_handler
 
-# bot = Bot(token="823238605:AAHZGYqQKhyC9ywH29T346J3oqTFza6mKDY")
-# bot = Bot(token="1700876973:AAFNG4dOdif4pj3dxsrTVg6hmp_3Gn2FqRo")
 from cfg import bot
 dp = Dispatcher(bot, storage=MemoryStorage())
 
